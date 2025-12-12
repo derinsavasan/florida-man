@@ -1,7 +1,3 @@
-<<<<<<< HEAD
-# florida-man
-an ode to the 305
-=======
 # Florida Man: A Data Story
 
 Static site that walks through a cleaned set of Florida Man headlines: where they came from, how they were tagged, and how they’re rendered in the browser. Built with D3 + Scrollama; everything runs client-side once `data.js` is present.
