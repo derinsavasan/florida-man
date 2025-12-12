@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Florida Man</title>
+<!-- Google Fonts: Tabloid/Newspaper vibe -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet"/>
+<link href="styles.css" rel="stylesheet"/>
+<!-- Favicon: alligator emoji -->
+<link rel="icon" type="image/svg+xml" sizes="any" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHZpZXdCb3g9JzAgMCAxMDAgMTAwJz48dGV4dCB5PScuOWVtJyBmb250LXNpemU9JzkwJz7wn5CKPC90ZXh0Pjwvc3ZnPg=="/>
+<link rel="apple-touch-icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHZpZXdCb3g9JzAgMCAxMDAgMTAwJz48dGV4dCB5PScuOWVtJyBmb250LXNpemU9JzkwJz7wn5CKPC90ZXh0Pjwvc3ZnPg=="/>
+<script src="https://unpkg.com/d3@7"></script>
+<script src="https://unpkg.com/scrollama"></script>
+</head>
+<body>
+<main>
+<!-- Hero Section -->
+<section id="intro">
+<div id="mugshot-container"></div>
+<h1>Florida Man</h1>
+<p class="intro__dek">
+                Every day, another absurd headline starts with "Florida Man…" and the internet points, laughs, and asks what the hell is wrong with this state.
+            </p>
+<p class="intro__scroll">↓ Scroll to explore the data</p>
+</section>
+<!-- Scrollama Container -->
+<section id="scrolly">
+<!-- Text Steps (Left Side) -->
+<article>
+<!-- Step 1: Introduction -->
+<div class="step" data-step="intro">
+<h2>Man vs. Fiction</h2>
+<p>“Florida Man” isn’t a person. It’s a meme about a person, built on the simple assumption that Florida produces more bizarre incidents than anywhere else in the US. The common rebuttal is also simple: <strong>Florida isn’t necessarily stranger, it just reports everything faster.</strong></p>
+<p>Thanks to the state's broad <a class="accent-link" href="https://www.leg.state.fl.us/statutes/index.cfm?App_mode=Display_Statute&amp;URL=0100-0199/0119/0119.html" rel="noopener noreferrer" target="_blank">Sunshine Laws (119)</a>, arrest records and incident reports in Florida become public almost immediately.</p>
+<p>Journalists love it because they can write “Florida Man…” within hours of arrest. So, it's not that other states don't have similarly bizarre crimes; we just don’t hear about “Ohio Man” as much due to the state's differing laws.</p>
+</div>
+<!-- Step 2: The Dataset -->
+<div class="step" data-step="dataset">
+<h2>Dataset</h2>
+<p>A total of <strong><span id="dataset-total">46,238</span></strong> headlines from <a class="accent-link" href="https://www.reddit.com/r/FloridaMan/" rel="noopener noreferrer" target="_blank">r/FloridaMan</a> were scraped,* spanning from 2014 to 2025. Each headline was then sorted into four recurring tropes:</p>
+<ul><li><strong>Animals</strong> – gators and pythons, runaway pets, rogue farm critters</li><li><strong>Nudity</strong> – streaking, indecent exposure, “forgot my clothes” moments</li><li><strong>Substances</strong> – booze, meth, weed, vapes, rehab relapses</li><li><strong>Weapons</strong> – guns and knives, bats and clubs, anything throwable</li></ul>
+<p>Some people get really creative with their crimes. Will get to that later.</p>
+<p class="footnote">*using <a class="accent-link" href="https://www.kaggle.com/datasets/bcruise/reddit-rfloridaman/data" rel="noopener noreferrer" target="_blank">Kaggle dataset</a>, Reddit's JSON API, BeautifulSoup, Pushshift.</p></div>
+<!-- Step 3: Trope Breakdown -->
+<div class="step" data-step="tropes">
+<h2>Trope Breakdown</h2>
+<p id="trope-narrative">Weapons lead for now; this will update with actual counts when data loads.</p>
+<div id="trope-samples" class="trope-animals hidden">
+<p id="trope-samples-title"></p>
+<ul id="trope-samples-list"></ul>
+</div>
+</div>
+<!-- Step 4: Multi-Trope Combinations -->
+<div class="step" data-step="combos">
+<h2>Chaos Combos</h2>
+<p class="combos-intro">When a headline hits more than one trope, the meme turns into a Mad Libs fever dream. Booze with blades. Critters with cuffs. Sometimes all three in one breath.</p>
+<p id="combos-narrative">Loading combo breakdown…</p>
+</div>
+<!-- Step 5: Trope Distribution -->
+<div class="step" data-step="distribution">
+<h2>The Big Picture</h2>
+<p id="distribution-narrative">Loading trope distribution…</p>
+<p id="distribution-question">But what does that mean exactly?</p>
+</div>
+<!-- Step 6: Zero-Trope Stories -->
+<div class="step" data-step="pure">
+<h2>"Pure" Crime</h2>
+<p>These are the <em>pure</em> Florida Man stories. No animals, no nudity, no drugs, no weapons. Just pure absurdity:</p>
+<div class="pure-layout">
+<div class="pure-stat">
+<div class="stat-display">
+<span class="big-number" id="pure-share">53%</span>
+<span class="stat-label">Stories with no standard tropes</span>
+<span class="stat-sub">"Pure" Florida Man absurdity</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Step 7: Absurdity Index -->
+<div class="step" data-step="absurdity">
+<h2>Absurdity Index</h2>
+<p><strong>Hypothesis:</strong> Longer headlines get more attention.</p>
+<p>"Florida Man arrested for having sex with a tree" is interesting. But <em class="accent-text">Florida Man has sex with a tree, then gets tased, pulling out the prongs, declaring himself to be Thor, God of Thunder, and then tries to stab the officer with his own badge</em> sells.</p>
+<p>Type a Florida Man headline to see if a close match already exists out there.</p>
+</div>
+<!-- Step 8: Word Frequency -->
+<div class="step" data-step="words">
+<h2>The Vocabulary</h2>
+<p>What words show up most often after filtering out the obvious ("florida", "man", "arrested", "police")?</p>
+<p>The answer tells us about the nature of these stories. Verbs of chaos. Objects of absurdity.</p>
+</div>
+<!-- Step 9: Geographic Distribution -->
+<div class="step" data-step="geography">
+<h2>Where It Happens</h2>
+<p id="geography-narrative">Location data loading…</p>
+<p>A few hotspots stand out more than what the raw population would suggest. Keep scrolling to see how it looks when these locations are rolled up by county.</p>
+<p class="footnote">*Location extraction isn't perfect. Many headlines don't mention a specific place and use "Florida Man" for the buzz.</p>
+</div>
+<!-- Step 10b: Florida Map -->
+<div class="step" data-step="map">
+<h2>County Map</h2>
+<p>It seems that Florida’s informal motto doesn't hold up here: <strong>the further south you go, the further south you are</strong>, if you catch my drift.</p>
+<p>Hover over the counties to see their individual headline count.</p>
+</div>
+<!-- Step 10: Seasonal Trends -->
+<div class="step" data-step="timeline">
+<h2>Seasonal Trends</h2>
+<p id="seasonal-narrative">Loading seasonal trend summary…</p>
+<p>Looks like Florida Man cools off in the hottest months. Maybe it’s just too brutal outside for even the headline-makers. Peak chaos shows up in the milder seasons when everyone’s back out causing trouble.</p>
+</div>
+<!-- Step 11: Conclusion -->
+<div class="step" data-step="conclusion">
+<h2>The Verdict</h2>
+<p>So does the Florida Man meme hold up? <strong>Yes and no.</strong></p>
+<p>The four tropes do explain less than half the stories. Florida Man's true nature is pure, uncategorizable absurdity. Maybe there's just something in the water.</p>
+</div>
+</article>
+<!-- Sticky Figure (Right Side) -->
+<figure>
+<div id="viz-container">
+<div class="viz active" id="viz-intro">
+<img alt="Florida Man collage" src="../welcome.png"/>
+</div>
+<div class="viz" id="viz-dataset">
+<svg id="chart-dataset"></svg>
+</div>
+<div class="viz" id="viz-tropes">
+<svg id="chart-tropes"></svg>
+</div>
+<div class="viz" id="viz-distribution">
+<svg id="chart-distribution"></svg>
+</div>
+<div class="viz" id="viz-combos">
+<svg id="chart-combos"></svg>
+</div>
+<div class="viz" id="viz-geography">
+<div class="geo-flex">
+<svg id="chart-geography"></svg>
+</div>
+</div>
+<div class="viz" id="viz-map">
+<div id="map-geography"></div>
+</div>
+<div class="viz" id="viz-words">
+<svg id="chart-words"></svg>
+</div>
+<div class="viz" id="viz-pure">
+<div class="pure-card pure-viz-card">
+<ul class="favorites">
+<li>"Florida Man uses a blow torch to open an ATM... instead he accidentally welds it shut"</li>
+<li>"Florida Woman offers ex-husband in home sale: He'll cook and clean"</li>
+<li>"Florida Man tries to steal chainsaw by sticking it down his pants"</li>
+</ul>
+</div>
+</div>
+<div class="viz" id="viz-absurdity">
+<div class="absurdity-card">
+<div class="absurdity-form">
+<textarea id="absurdity-input" rows="1" placeholder="Type a Florida Man headline or description"></textarea>
+<button id="absurdity-search" type="button">Find similar</button>
+</div>
+<ul id="absurdity-results"></ul>
+</div>
+</div>
+<div class="viz" id="viz-timeline">
+<svg id="chart-timeline"></svg>
+</div>
+<div class="viz" id="viz-conclusion">
+<div class="stat-display conclusion">
+<span class="big-number">🐊</span>
+<span class="stat-label">Stay weird, Florida!</span>
+</div>
+</div>
+</div>
+</figure>
+</section>
+<!-- Footer -->
+<section id="outro">
+<p>Built with D3.js and Scrollama. Made with love in the 305.</p>
+</section>
+</main>
+<script src="data.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
