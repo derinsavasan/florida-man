@@ -5,6 +5,20 @@
 // DATA PROCESSING
 // ============================================
 
+// data.js ships a compact array-of-arrays to keep the payload small.
+// Each row is [headline, date(no tz), source_url, location("" => Florida), flags bitmask].
+// Rehydrate into the full objects the rest of this file expects (byte-identical to the old shape).
+const floridaManData = floridaManRows.map(r => ({
+    headline: r[0],
+    date: r[1] + '+00:00',
+    source_url: r[2],
+    location_hint: r[3] || 'Florida',
+    has_animals:    (r[4] & 1) ? 'True' : 'False',
+    has_nudity:     (r[4] & 2) ? 'True' : 'False',
+    has_substances: (r[4] & 4) ? 'True' : 'False',
+    has_weapons:    (r[4] & 8) ? 'True' : 'False'
+}));
+
 const TROPE_LABELS = {
     weapons: 'Weapons',
     substances: 'Substances',
@@ -439,7 +453,7 @@ function updateDistributionText(data) {
     const pctWith = ((withTrope / total) * 100).toFixed(1);
     const narrativeEl = document.getElementById('distribution-narrative');
     if (narrativeEl) {
-        narrativeEl.innerHTML = `If you did some math along the way, you'll realize that the headlines we've looked at so far don't add up to the ${total.toLocaleString()} grand total.<br><br>That's because headlines including any number of tropes (one or more) add up to only ${pctWith}% of the data. This means <strong>${zero.toLocaleString()} stories don't include any tropes at all.</strong>`;
+        narrativeEl.innerHTML = `If you did some math along the way, you’ll realize that the headlines we’ve looked at so far don’t add up to the ${total.toLocaleString()} grand total.<br><br>That’s because headlines including any number of tropes (one or more) add up to only ${pctWith}% of the data. This means <strong>${zero.toLocaleString()} stories don’t include any tropes at all.</strong>`;
     }
 }
 
@@ -2322,8 +2336,10 @@ function initScrollama() {
     createGeographyChart(data);
     createMapViz(data);
     createWordsChart();
-    createAbsurdityChart(data);
     createTimelineChart(data);
+    // The absurdity search builds a sizeable in-browser index over every headline;
+    // defer it off the initial render path so it never blocks first paint.
+    (window.requestIdleCallback || ((cb) => setTimeout(cb, 200)))(() => createAbsurdityChart(data));
 
     // Step handler
     function handleStepEnter(response) {
@@ -2421,19 +2437,24 @@ function initScrollama() {
         .onStepEnter(handleStepEnter)
         .onStepExit(handleStepExit);
 
-    // Handle resize
+    // Handle resize (debounced; a full redraw and map re-render are expensive,
+    // and resize fires rapidly during window drags and mobile address-bar show/hide).
+    let resizeTimer;
     window.addEventListener('resize', () => {
-        scroller.resize();
-        // Redraw charts
-        createDatasetViz(data);
-        createTropeBarChart(data);
-        createDistributionChart(data);
-        createCombosChart(data);
-        createGeographyChart(data);
-        createMapViz(data);
-        createWordsChart();
-        createAbsurdityChart(data);
-        createTimelineChart(data);
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(() => {
+            scroller.resize();
+            // Redraw charts
+            createDatasetViz(data);
+            createTropeBarChart(data);
+            createDistributionChart(data);
+            createCombosChart(data);
+            createGeographyChart(data);
+            createMapViz(data);
+            createWordsChart();
+            createAbsurdityChart(data);
+            createTimelineChart(data);
+        }, 200);
     });
 }
 
@@ -2444,6 +2465,10 @@ function initScrollama() {
 function initMugshotFrame() {
     const container = document.getElementById('mugshot-container');
     if (!container) return;
+
+    // The belt is decorative and is hidden on phones (see styles.css); don't build
+    // or animate it there, since it only crowds the hero and wastes a rAF loop.
+    if (window.matchMedia && window.matchMedia('(max-width: 600px)').matches) return;
 
     // Available mugshot images - all 19
     const mugshots = [
@@ -2525,6 +2550,7 @@ function initMugshotFrame() {
     let globalProgress = 0;
     const speed = 0.3; // Slower for smoother feel
     let lastTime = 0;
+    let running = true;
     
     function animate(currentTime) {
         // Delta time for consistent speed regardless of frame rate
@@ -2568,11 +2594,14 @@ function initMugshotFrame() {
             
             el.style.transform = `translate3d(${x}px, ${y}px, 0)`;
         });
-        
-        requestAnimationFrame(animate);
+
+        if (running) requestAnimationFrame(animate);
     }
     
-    // Start animation
+    // Respect prefers-reduced-motion: run a single frame to lay the belt out, then stop.
+    if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        running = false;
+    }
     requestAnimationFrame(animate);
 }
 

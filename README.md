@@ -1,6 +1,6 @@
 # Florida Man: A Data Story
 
-[*Florida Man*](https://derinsavasan.github.io/florida-man/) is a static site that walks through a cleaned set of Florida Man headlines: where they came from, how they were tagged, and how they’re rendered in the browser. Built with D3 + Scrollama; everything runs client-side once `data.js` is present.
+[Florida Man](https://derinsavasan.github.io/florida-man/) is a static site that walks through a cleaned set of Florida Man headlines: where they came from, how they were tagged, and how they’re rendered in the browser. Built with D3 + Scrollama; everything runs client-side once `data.js` is present.
 
 ## Data Sources
 - Kaggle base: [`r/FloridaMan` dataset](https://www.kaggle.com/datasets/bcruise/reddit-rfloridaman/data).
@@ -12,9 +12,26 @@
 2. Parse dates, coerce to ISO. Anything unparseable is dropped from time-based charts.
 3. Trope flags (`has_animals`, `has_nudity`, `has_substances`, `has_weapons`) set from the scraper; regex patterns in `app.js`/notebook are the single source of truth.
 4. Location cleanup: keep raw `location_hint`; optional county rollups happen later in the browser.
-5. Export to `data.js` as `const floridaManData = [...]` (all strings/booleans).
+5. Export the dataset, then compact it for the web (see below).
 
-The working notebook for this pass lives in `florida-man-WIP.ipynb`; the final export is `data.js`.
+The working notebook for this pass lives in `florida-man.ipynb`; the final export is `data.js`.
+
+### Compact `data.js` format
+To keep the payload small, the deployed `docs/data.js` is **not** the verbose
+`[{...}]` object array. It is a compact array-of-arrays assigned to
+`floridaManRows`, one row per headline:
+
+```
+[headline, date(no "+00:00" tz), source_url, location ("" means "Florida"), flags]
+```
+
+`flags` is a bitmask: `animals=1, nudity=2, substances=4, weapons=8`. The constant
+`source` field is dropped. `app.js` rehydrates these rows back into the original
+object shape at load time, so the rest of the code is unchanged.
+
+> If you regenerate `data.js` from the notebook, it will emit the old verbose
+> format again. Either re-run the compaction step or revert the rehydration shim
+> at the top of `app.js`.
 
 ## Frontend
 - `index.html`: Scroll-driven narrative steps; SVG containers for each viz; footnotes; footer.
@@ -37,11 +54,10 @@ florida-man-website/
   data.js         # generated dataset
   mugshots/       # belt assets
   florida-counties.geojson  # local county shapes for the map
-florida-man-WIP.ipynb        # data prep notebook
+florida-man.ipynb        # data prep notebook
 ```
 
 ## Notes
 - Location extraction is imperfect; headlines without a place stay as “Florida”.
 - County map colors are driven by county counts plus city rollups (see `CITY_TO_COUNTY` in `app.js`).
 - Everything is static; no tracking, no backend.
->>>>>>> afd4b63 (initial commit)

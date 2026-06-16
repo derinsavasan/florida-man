@@ -1,0 +1,14 @@
+# macOS
+.DS_Store
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+
+# Editor
+.vscode/*
+!.vscode/settings.json
+
+# Jupyter
+.ipynb_checkpoints/

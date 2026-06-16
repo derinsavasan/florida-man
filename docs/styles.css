@@ -13,7 +13,7 @@
     --paper: #f4f1de;
     --ink: #1a1a1a;
     --ink-light: #3d3d3d;
-    --ink-faded: #6b705c;
+    --ink-faded: #54583f;
     
     /* Trope colors - Florida-themed, complementing green palette */
     --trope-animals: #e76f51;   /* coral orange - wildlife, flamingo */
@@ -794,6 +794,39 @@ figure {
     font-size: 0.75rem !important; /* override step p sizing */
     font-style: italic;
     color: var(--ink-faded);
-    opacity: 0.6;
+    opacity: 0.9;
     margin-top: 0.5rem;
+}
+
+/* ============================================
+   PHONE BREAKPOINT (tuning on top of the 1024px stacked layout)
+   ============================================ */
+@media (max-width: 600px) {
+    html, body { font-size: 16px; }
+    /* The mugshot belt frames the hero on desktop but crowds the text on phones. */
+    #mugshot-container { display: none; }
+    #intro { padding: 1.25rem; }
+    #intro h1 { font-size: 2rem; line-height: 1.05; letter-spacing: 0; }
+    .intro__dek { font-size: 1rem; max-width: 100%; }
+    .intro__scroll { font-size: 0.85rem; }
+    figure { height: 60vh; }
+    article { padding: 0 1rem; }
+    .step { padding: 1.5rem 0.75rem; }
+    .step h2 { font-size: 1.6rem; }
+    .step p { font-size: 1rem; }
+    .stat-display .big-number { font-size: 3.5rem; }
+    #outro { padding: 2.5rem 1rem; }
+}
+
+/* ============================================
+   REDUCED MOTION: honor the OS/browser preference
+   (the mugshot belt is also halted in JS; see initMugshotFrame)
+   ============================================ */
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation-duration: 0.001ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.001ms !important;
+        scroll-behavior: auto !important;
+    }
 }
